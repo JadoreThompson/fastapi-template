@@ -1,20 +1,20 @@
-import jwt
-
 from dataclasses import asdict
 from datetime import datetime
-from fastapi import Response
 from sqlalchemy import select
+
+import jwt
+from fastapi import Response
 
 from config import COOKIE_ALIAS, PRODUCTION, JWT_SECRET, JWT_ALGO, JWT_EXPIRY
 from db_models import Users
+from server.exc import JWTError
 from server.typing import JWTPayload
-from utils import get_datetime, get_db_sess
-from ..exc import JWTError
+from utils import get_db_sess, get_datetime
 
 
 class JWTService:
     @staticmethod
-    def generate(**kwargs) -> str:
+    def generate_jwt(**kwargs) -> str:
         """Generates a JWT token"""
         if kwargs.get("exp") is None:
             kwargs["exp"] = datetime.now() + JWT_EXPIRY
@@ -23,7 +23,7 @@ class JWTService:
         return jwt.encode(asdict(payload), JWT_SECRET, algorithm=JWT_ALGO)
 
     @staticmethod
-    def decode(token: str) -> JWTPayload:
+    def decode_jwt(token: str) -> JWTPayload:
         try:
             return JWTPayload(**jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO]))
         except jwt.ExpiredSignatureError:
@@ -33,7 +33,7 @@ class JWTService:
 
     @staticmethod
     def set_cookie(user: Users, rsp: Response | None = None) -> Response:
-        token = JWTService.generate(sub=user.user_id)
+        token = JWTService.generate_jwt(sub=user.user_id)
         if rsp is None:
             rsp = Response()
 

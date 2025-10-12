@@ -1,8 +1,6 @@
-import aiohttp
-from fastapi import Depends, FastAPI
-
-from server.dependencies import depends_http_sess
-
+from fastapi import FastAPI
+from server.routes.auth.route import router as auth_router
 
 app = FastAPI()
 
+app.include_router(auth_router)

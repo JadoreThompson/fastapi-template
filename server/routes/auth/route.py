@@ -9,10 +9,10 @@ from server.services import JWTService
 from .models import UserCreate, UserLogin
 
 
-route = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@route.post("/register")
+@router.post("/register")
 async def register(body: UserCreate, db_sess: AsyncSession = Depends(depends_db_sess)):
     res = await db_sess.execute(select(Users).where(Users.username == body.username))
     if res.first():
@@ -29,7 +29,7 @@ async def register(body: UserCreate, db_sess: AsyncSession = Depends(depends_db_
     return JWTService.set_cookie(new_user)
 
 
-@route.post("/login")
+@router.post("/login")
 async def login(body: UserLogin, db_sess: AsyncSession = Depends(depends_db_sess)):
     if (body.username is None or not body.username.strip()) and (
         body.email is None or not body.email.strip()

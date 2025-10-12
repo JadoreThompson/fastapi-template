@@ -11,9 +11,9 @@ PRODUCTION = False
 
 
 # Auth
-COOKIE_ALIAS = "strat-builder-cookie"
-JWT_ALGO = "HS256"
-JWT_SECRET = os.getenv("COOKIE_SECRET", "secret")
+COOKIE_ALIAS = "app-cookie"
+JWT_ALGO = os.getenv("JWT_ALGO", "HS256")
+JWT_SECRET = os.getenv("JWT_SECRET", "secret")
 JWT_EXPIRY = timedelta(days=1000)
 
 

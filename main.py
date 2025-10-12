@@ -1,5 +1,8 @@
+import uvicorn
+
+
 def main():
-    print("Hello from fastapi-template!")
+    uvicorn.run("server.app:app", host="localhost", port=8000, reload=True)
 
 
 if __name__ == "__main__":

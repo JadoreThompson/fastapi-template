@@ -1,4 +1,3 @@
-import aiohttp
 from fastapi import Request
 
 from config import COOKIE_ALIAS
@@ -6,11 +5,6 @@ from utils import smaker
 from server.exc import JWTError
 from server.typing import JWTPayload
 from server.services import JWTService
-
-
-async def depends_http_sess():
-    async with aiohttp.ClientSession() as sess:
-        yield sess
 
 
 async def depends_db_sess():
@@ -39,5 +33,5 @@ async def depends_jwt(req: Request) -> JWTPayload:
     if not token:
         raise JWTError("Authentication token is missing")
 
-    payload = JWTService.decode(token)
+    payload = JWTService.decode_jwt(token)
     return await JWTService.validate_payload(payload)
