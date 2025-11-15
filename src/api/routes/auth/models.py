@@ -2,8 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, field_validator
 
+from api.exc import CustomValidationError
 from core.models import CustomBaseModel
-from server.exc import CustomValidationError
 
 
 class PasswordField(BaseModel):

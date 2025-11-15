@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4, UUID
 
-from sqlalchemy import UUID as SaUUID, Integer, String, DateTime
+from sqlalchemy import UUID as SaUUID, String, DateTime
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
 from core.enums import PricingTierType

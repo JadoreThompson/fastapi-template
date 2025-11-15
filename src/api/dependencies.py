@@ -2,10 +2,10 @@ from typing import Type, TypeVar
 
 from fastapi import Depends, Request
 
+from api.exc import JWTError
+from api.typing import JWTPayload
+from api.services import JWTService
 from config import COOKIE_ALIAS
-from server.exc import JWTError
-from server.typing import JWTPayload
-from server.services import JWTService
 from utils.db import smaker
 
 

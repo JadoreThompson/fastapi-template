@@ -2,11 +2,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from api.exc import CustomValidationError, JWTError
+from api.middlewares import RateLimitMiddleware
+from api.routes.auth.route import router as auth_router
+from api.routes.public.route import router as public_router
 from config import DOMAIN, SCHEME, SUB_DOMAIN
-from server.exc import CustomValidationError, JWTError
-from server.middlewares import RateLimitMiddleware
-from server.routes.auth.route import router as auth_router
-from server.routes.public.route import router as public_router
 
 
 app = FastAPI()

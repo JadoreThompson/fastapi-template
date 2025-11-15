@@ -7,18 +7,14 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import (
-    PW_HASH_SALT,
-    REDIS_CLIENT,
-    REDIS_EMAIL_VERIFICATION_KEY_PREFIX,
-    REDIS_EXPIRY,
-)
+from api.dependencies import depends_db_sess, depends_jwt
+from api.services import JWTService
+from api.typing import JWTPayload
+from config import PW_HASH_SALT, REDIS_EMAIL_VERIFICATION_KEY_PREFIX, REDIS_EXPIRY
 from core.services import EmailService
 from db_models import Users
-from server.dependencies import depends_db_sess, depends_jwt
-from server.services import JWTService
-from server.typing import JWTPayload
 from utils.db import get_datetime
+from utils.redis import REDIS_CLIENT
 from .controller import gen_verification_code
 from .models import (
     UpdatePassword,

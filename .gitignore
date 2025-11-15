@@ -2,6 +2,6 @@
 __pycache__
 
 alembic.ini
+*.log
 
-resources
 .env

@@ -1,17 +1,15 @@
 from fastapi import APIRouter, BackgroundTasks, status
 
-from config import PERSONAL_EMAIL
+from config import CUSTOMER_SUPPORT_EMAIL
 from core.services import EmailService
 from .models import ContactForm
 
 
 router = APIRouter(prefix="/public", tags=["Public"])
-email_service = EmailService(
-    sender_name="Support", sender_email="support@domain.com"
-)
+email_service = EmailService(sender_name="Support", sender_email="support@domain.com")
 
 
-@router.post("/contact-us", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/contact", status_code=status.HTTP_202_ACCEPTED)
 async def contact_us(body: ContactForm, background_tasks: BackgroundTasks):
     subject = f"New Contact Inquiry from {body.name}"
 
@@ -27,7 +25,7 @@ Message:\n
 """
     background_tasks.add_task(
         email_service.send_email,
-        recipient=PERSONAL_EMAIL,
+        recipient=CUSTOMER_SUPPORT_EMAIL,
         subject=subject,
         body=em_body.strip(),
     )

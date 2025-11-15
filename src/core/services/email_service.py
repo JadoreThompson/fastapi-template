@@ -1,9 +1,6 @@
 import logging
 
 
-logger = logging.getLogger("email_service")
-
-
 class EmailService:
     _instances: dict[tuple[str, str], "EmailService"] = {}
 
@@ -19,6 +16,7 @@ class EmailService:
         if hasattr(self, "_initialised") and self._initialised:
             return
 
+        self._logger = logging.getLogger("email_service")
         self.sender_name = sender_name
         self.sender_email = sender_email
         self._initialised = True

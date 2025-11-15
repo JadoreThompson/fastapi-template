@@ -4,13 +4,23 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, Session
 
-from config import DB_ENGINE, DB_HOST_CREDS, DB_NAME, DB_USER_CREDS
+from config import DB_HOST_CREDS, DB_NAME, DB_USER_CREDS
 
 
+DB_ENGINE = create_async_engine(
+    f"postgresql+asyncpg://{DB_USER_CREDS}@{DB_HOST_CREDS}/{DB_NAME}"
+)
+DB_ENGINE_SYNC = create_engine(
+    f"postgresql+psycopg2://{DB_USER_CREDS}@{DB_HOST_CREDS}/{DB_NAME}"
+)
 smaker = sessionmaker(DB_ENGINE, class_=AsyncSession, autocommit=False, autoflush=False)
+smaker_sync = sessionmaker(
+    DB_ENGINE_SYNC, class_=Session, autocommit=False, autoflush=False
+)
 
 
 def get_datetime():
@@ -27,7 +37,7 @@ async def get_db_sess() -> AsyncGenerator[AsyncSession, None]:
             raise
 
 
-def write_db_url_to_alembic_ini(alembic_ini_path: str = "alembic.ini") -> None:
+def write_db_url_to_alembic_ini(alembic_ini_path: str) -> None:
     db_url = f"postgresql+psycopg2://{DB_USER_CREDS}@{DB_HOST_CREDS}/{DB_NAME}"
 
     safe_db_url = db_url.replace("%", "%%")

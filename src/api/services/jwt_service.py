@@ -6,10 +6,10 @@ from fastapi import Response
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.exc import JWTError
+from api.typing import JWTPayload
 from config import COOKIE_ALIAS, IS_PRODUCTION, JWT_SECRET, JWT_ALGO, JWT_EXPIRY
 from db_models import Users
-from server.exc import JWTError
-from server.typing import JWTPayload
 from utils.db import get_db_sess, get_datetime
 
 
