@@ -28,7 +28,7 @@ from .models import (
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
-em_service = EmailService("No-Reply", "no-reply@gova.chat")
+em_service = EmailService("No-Reply", "no-reply@domain.com")
 pw_hasher = PasswordHasher()
 
 
