@@ -47,6 +47,8 @@ def depends_jwt(is_authenticated: bool = True):
 def CSVQuery(name: str, Typ: Type[T]):
     def func(req: Request) -> list[T]:
         vals = req.query_params.get(name)
+        if name is None:
+            return []
         return [Typ(val.strip()) for val in vals.strip().split(",")]
 
     return Depends(func)

@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, field_validator
 
 from api.exc import CustomValidationError
+from core.enums import PricingTierType
 from core.models import CustomBaseModel
 
 
@@ -47,17 +48,17 @@ class UserLogin(CustomBaseModel):
     password: str
 
 
-class UserConnection(BaseModel):
-    username: str
-    avatar: str
-
-
 class UserMe(CustomBaseModel):
     username: str
+    pricing_tier: PricingTierType
 
 
 class UpdateUsername(BaseModel):
     username: str
+
+
+class UpdateEmail(BaseModel):
+    email: str
 
 
 class UpdatePassword(PasswordField):
@@ -69,4 +70,4 @@ class VerifyCode(BaseModel):
 
 
 class VerifyAction(VerifyCode):
-    action: Literal["change_username", "change_password"]
+    action: Literal["change_username", "change_password", "change_email"]

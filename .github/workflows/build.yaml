@@ -7,10 +7,6 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: self-hosted
-    environment: deploy-env
-    permissions:
-      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,40 +33,5 @@ jobs:
 
       - name: Build backend image
         run: |
-          docker build -q -t ${{ secrets.DOCKERHUB_IMAGE }}:latest .
-          docker push -q ${{ secrets.DOCKERHUB_IMAGE }}:latest
-
-      - name: Install UV
-        uses: astral-sh/setup-uv@v7
-
-      - name: Run backend
-        run: |
-          NETWORK_NAME=your-network
-
-          echo "Initialising swarm and network"
-          docker swarm init || true
-          docker network inspect $NETWORK_NAME >/dev/null 2>&1 || \
-            docker network create --driver overlay --attachable $NETWORK_NAME
-
-          echo "Loading envs into shell"
-
-          cat <<EOF > src/tmp.py
-          from utils.utils import load_envs
-          load_envs()
-          EOF
-
-          eval $(uv run src/tmp.py)
-          
-          COMPOSE_FILE=production-compose.yaml
-          NEW_COMPOSE_FILE=new-compose.yaml
-          echo "Loading envs into ${COMPOSE_FILE}"
-          docker stack config -c $COMPOSE_FILE > $NEW_COMPOSE_FILE
-
-          echo "Deploying stack"
-          docker stack deploy -c $NEW_COMPOSE_FILE your-stack
-
-      - name: Apply DB migrations
-        run: |
-          set -e
-          docker build -q -t migrate-db --file MigrationDockerfile .
-          docker run --rm --name migration_db --network $NETWORK_NAME migrate-db
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_IMAGE }}:latest -f docker/Dockerfile .
+          docker push ${{ secrets.DOCKERHUB_IMAGE }}:latest

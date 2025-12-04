@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from datetime import datetime
 
 import jwt
@@ -6,25 +5,32 @@ from fastapi import Response
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import COOKIE_ALIAS, IS_PRODUCTION, JWT_SECRET, JWT_ALGO, JWT_EXPIRY_SECS
+from db_models import Users
 from api.exc import JWTError
 from api.typing import JWTPayload
-from config import COOKIE_ALIAS, IS_PRODUCTION, JWT_SECRET, JWT_ALGO, JWT_EXPIRY
-from db_models import Users
 from utils.db import get_db_sess, get_datetime
 
 
 class JWTService:
-    @staticmethod
-    def generate_jwt(**kwargs) -> str:
+    @classmethod
+    def _generate_expiry(cls) -> datetime:
+        """Private method to generate JWT expiry datetime"""
+        return get_datetime() + JWT_EXPIRY_SECS
+
+    @classmethod
+    def generate_jwt(cls, **kwargs) -> str:
         """Generates a JWT token"""
         if kwargs.get("exp") is None:
-            kwargs["exp"] = datetime.now() + JWT_EXPIRY
+            kwargs["exp"] = cls._generate_expiry()
         kwargs["sub"] = str(kwargs["sub"])
         payload = JWTPayload(**kwargs)
-        return jwt.encode(asdict(payload), JWT_SECRET, algorithm=JWT_ALGO)
+        return jwt.encode(
+            payload.model_dump(mode="json"), JWT_SECRET, algorithm=JWT_ALGO
+        )
 
-    @staticmethod
-    def decode_jwt(token: str) -> JWTPayload:
+    @classmethod
+    def decode_jwt(cls, token: str) -> JWTPayload:
         try:
             return JWTPayload(**jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO]))
         except jwt.ExpiredSignatureError:
@@ -32,9 +38,9 @@ class JWTService:
         except jwt.InvalidTokenError:
             raise JWTError("Invalid token")
 
-    @staticmethod
-    def set_cookie(user: Users, rsp: Response | None = None) -> Response:
-        token = JWTService.generate_jwt(
+    @classmethod
+    def set_cookie(cls, user: Users, rsp: Response | None = None) -> Response:
+        token = cls.generate_jwt(
             sub=user.user_id,
             em=user.email,
             pricing_tier=user.pricing_tier,
@@ -48,15 +54,18 @@ class JWTService:
             token,
             httponly=True,
             secure=IS_PRODUCTION,
-            expires=get_datetime() + JWT_EXPIRY,
+            expires=cls._generate_expiry(),
         )
         return rsp
 
-    @staticmethod
+    @classmethod
     async def set_user_cookie(
-        user: Users, db_sess: AsyncSession | None = None, rsp: Response | None = None
+        cls,
+        user: Users,
+        db_sess: AsyncSession | None = None,
+        rsp: Response | None = None,
     ) -> Response:
-        token = JWTService.generate_jwt(
+        token = cls.generate_jwt(
             sub=user.user_id,
             em=user.email,
             pricing_tier=user.pricing_tier,
@@ -65,28 +74,21 @@ class JWTService:
         if rsp is None:
             rsp = Response()
 
-        if db_sess:
-            await db_sess.execute(
-                update(Users).values(jwt=token).where(Users.user_id == user.user_id)
-            )
-        else:
-            async with get_db_sess() as db_sess:
-                await db_sess.execute(
-                    update(Users).values(jwt=token).where(Users.user_id == user.user_id)
-                )
-            await db_sess.commit()
+        await db_sess.execute(
+            update(Users).values(jwt=token).where(Users.user_id == user.user_id)
+        )
 
         rsp.set_cookie(
             COOKIE_ALIAS,
             token,
             httponly=True,
             secure=IS_PRODUCTION,
-            expires=get_datetime() + JWT_EXPIRY,
+            expires=cls._generate_expiry(),
         )
         return rsp
 
-    @staticmethod
-    def remove_cookie(rsp: Response | None = None) -> Response:
+    @classmethod
+    def remove_cookie(cls, rsp: Response | None = None) -> Response:
         if rsp is None:
             rsp = Response()
         rsp.delete_cookie(COOKIE_ALIAS, httponly=True, secure=IS_PRODUCTION)
@@ -110,7 +112,7 @@ class JWTService:
         payload = cls.decode_jwt(token)
         if is_authenticated and not payload.authenticated:
             raise JWTError("User not authenticated")
-        if payload.exp < get_datetime().timestamp():
+        if payload.exp < get_datetime():
             raise JWTError("Expired token")
 
         async with get_db_sess() as db_sess:

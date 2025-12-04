@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, status
 
 from config import CUSTOMER_SUPPORT_EMAIL
-from core.services import EmailService
+from services import EmailService
 from .models import ContactForm
 
 

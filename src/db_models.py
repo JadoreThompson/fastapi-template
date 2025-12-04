@@ -1,15 +1,13 @@
 from datetime import datetime
-from uuid import uuid4, UUID
+from uuid import UUID
 
 from sqlalchemy import UUID as SaUUID, String, DateTime
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
 from core.enums import PricingTierType
 from utils.db import get_datetime
+from utils.utils import get_uuid
 
-
-def get_uuid():
-    return uuid4()
 
 
 class Base(DeclarativeBase):

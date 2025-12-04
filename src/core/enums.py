@@ -6,5 +6,3 @@ class PricingTierType(str, Enum):
     PRO = 'pro'
     ENTERPRISE = 'enterprise'
 
-
-class CoreEventType(str, Enum): ...

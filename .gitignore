@@ -5,3 +5,4 @@ alembic.ini
 *.log
 
 .env
+.env.prod
